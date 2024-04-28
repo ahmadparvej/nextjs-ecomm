@@ -21,6 +21,7 @@ import { useForm } from "react-hook-form";
 import { AiOutlineReload } from "react-icons/ai";
 import z from "zod";
 import toast from 'react-hot-toast';
+import { signIn } from "next-auth/react";
 
 const Login = () => {
 
@@ -37,14 +38,40 @@ const Login = () => {
 
   const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
     setBtnLoading(true);
-    let res = await axios.post("api/users/login", values)
-    if(res.data.status == "success"){
-      router.push("/home")
-    }else if(res.data.status == "failed"){
-      setBtnLoading(false)
-      toast.error(res.data.message)
+
+    const result = await signIn('credentials', {
+      redirect: false,
+      email: values.email,
+      password: values.password
     }
+    )
+    
+
+    console.log(result)
+
+    // let res = await axios.post("api/users/login", values)
+    if(result?.error){
+      toast.error(result.error)
+      setBtnLoading(false)
+    }else if(result?.ok){
+      router.push("/home")
+    }
+
   };
+
+  const googleLogin = async () => {
+    const result = await signIn('google')
+
+    console.log(result)
+
+    // let res = await axios.post("api/users/login", values)
+    if(result?.error){
+      toast.error(result.error)
+      setBtnLoading(false)
+    }else if(result?.ok){
+      router.push("/home")
+    }
+  }
 
   return (
     <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
@@ -119,15 +146,22 @@ const Login = () => {
                     <>Login</>
                   )}
                 </Button>
-                <Button variant="outline" className="w-full">
-                  Login with Google
+                <Button onClick={googleLogin} variant="outline" className="w-full">
+                  {btnLoading ? (
+                    <>
+                      <AiOutlineReload className="mr-2 h-4 w-4 animate-spin" />
+                      Please wait
+                    </>
+                  ) : (
+                    <>Login with Google</>
+                  )}
                 </Button>
               </form>
             </Form>
           </div>
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="underline">
+            <Link href="/sign-up" className="underline">
               Sign up
             </Link>
           </div>

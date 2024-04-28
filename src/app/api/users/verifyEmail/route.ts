@@ -9,16 +9,16 @@ export async function POST (request: NextRequest) {
         connect();
 
         const req = await request.json();
-        const { token } = req;
+        const { email, otp } = req;
 
-        const user = await User.findOne({ verifyToken : token, verifyTokenExpiry: {$gt: Date.now()} });
+        const user = await User.findOne({ email: email, verifyOTPExpiry: {$gt: Date.now()}, verifyOTP: otp });
         if(!user){
             return NextResponse.json({ status: "failed", message: "Invalid verification token" });
         }
 
         user.isVerified = true;
-        user.verifyToken = undefined;
-        user.verifyTokenExpiry = undefined;
+        user.verifyOTP = undefined;
+        user.verifyOTPExpiry = undefined;
 
         await user.save()
 

@@ -21,6 +21,7 @@ import axios from 'axios';
 import { useRouter } from "next/navigation";
 import { AiOutlineReload } from "react-icons/ai";
 import toast from 'react-hot-toast';
+import { signIn } from 'next-auth/react';
 
 const Register = () => {
 
@@ -30,7 +31,7 @@ const Register = () => {
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
-      username: "",
+      name: "",
       email: "",
       password: ""
     },
@@ -39,10 +40,10 @@ const Register = () => {
   const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
     setBtnLoading(true)
     try {
-      let res = await axios.post("/api/users/signup", values)
-      if(res.data.status === "success"){
-        router.push("/login")
-      }else if(res.data.status === "failed"){
+      let res = await axios.post("/api/sign-up", values)
+      if(res.data.success){
+        router.push("/sign-in")
+      }else if(!res.data.success){
         setBtnLoading(false)
         toast.error(res.data.message)
       }
@@ -51,6 +52,20 @@ const Register = () => {
       toast.error(error.message)
     }
   };
+
+  const googleLogin = async () => {
+    const result = await signIn('google')
+
+    console.log(result)
+
+    // let res = await axios.post("api/users/login", values)
+    if(result?.error){
+      toast.error(result.error)
+      setBtnLoading(false)
+    }else if(result?.ok){
+      router.push("/home")
+    }
+  }
 
   return (
     <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
@@ -78,9 +93,9 @@ const Register = () => {
                 className="space-y-6"
               >
                 <div className="grid gap-2">
-                  <FormField control={form.control} name="username" render={({field})=>(
+                  <FormField control={form.control} name="name" render={({field})=>(
                         <FormItem>
-                            <FormLabel>Username</FormLabel>
+                            <FormLabel>Name</FormLabel>
                             <FormControl>
                                 <Input 
                                 {...field}
@@ -132,7 +147,7 @@ const Register = () => {
                     <>Register</>
                   )}
                 </Button>
-                <Button variant="outline" className="w-full">
+                <Button onClick={googleLogin} variant="outline" className="w-full">
                   Register with Google
                 </Button>
               </form>
@@ -140,7 +155,7 @@ const Register = () => {
           </div>
           <div className="mt-4 text-center text-sm">
             already have an account?{" "}
-            <Link href="/login" className="underline">
+            <Link href="/sign-in" className="underline">
               Login Now
             </Link>
           </div>
