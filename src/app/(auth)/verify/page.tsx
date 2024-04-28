@@ -8,6 +8,7 @@ import {
     InputOTPSeparator,
     InputOTPSlot,
   } from "@/components/ui/input-otp"
+import toast from 'react-hot-toast';
 
 const VerifyEmail = () => {
 
@@ -18,14 +19,16 @@ const VerifyEmail = () => {
 
     const onVerifyEmailClick = async ()=>{
         try {
-            let res = await axios.post("/api/users/verifyEmail", { email, otp })
+            let res = await axios.post("/api/auth/verifyEmail", { email, otp })
             if(res.data.status === "success"){
-                router.push("/login");
+                router.push("/sign-in");
             }else{
                 console.log(res.data.message)
+                toast.error(res.data.message)
             }
-        } catch (error) {
+        } catch (error:any) {
             console.log(error)
+            toast.error(error)
         }
     }
 
@@ -40,14 +43,13 @@ const VerifyEmail = () => {
                         Please click the button below to verify your email address.
                     </p>
                 </div>
-                <div>
+                <div className="flex justify-center">
                     <InputOTP maxLength={6} value={otp} onChange={(value:any) => setOtp(value)}>
                         <InputOTPGroup>
                             <InputOTPSlot index={0} />
                             <InputOTPSlot index={1} />
                             <InputOTPSlot index={2} />
                         </InputOTPGroup>
-                        <InputOTPSeparator />
                         <InputOTPGroup>
                             <InputOTPSlot index={3} />
                             <InputOTPSlot index={4} />

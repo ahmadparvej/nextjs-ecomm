@@ -40,7 +40,7 @@ const Register = () => {
   const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
     setBtnLoading(true)
     try {
-      let res = await axios.post("/api/sign-up", values)
+      let res = await axios.post("/api/auth/sign-up", values)
       if(res.data.success){
         router.push("/sign-in")
       }else if(!res.data.success){
