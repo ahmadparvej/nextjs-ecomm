@@ -4,12 +4,19 @@ import GoogleProvider from "next-auth/providers/google"
 import { connect } from '@/db/db';
 import User from '@/models/user.model';
 import bcrypt from 'bcryptjs';
+import { signIn } from 'next-auth/react';
 
 export const authOptions: NextAuthOptions = {
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID!,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET!
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+
+            profile(profile){
+                console.log(profile)
+                let userRole = "google user"
+                return {...profile, id: profile.sub, role: userRole }
+            }
         }),
         CredentialsProvider({
             id: "credentials",
@@ -50,21 +57,11 @@ export const authOptions: NextAuthOptions = {
     ],
     callbacks: {
         async session({ session, token }) {
-            if(token){
-                session.user._id = token._id;
-                session.user.isVerified = token.isVerified;
-                session.user.isAcceptingMessages = token.isAcceptingMessages;
-                session.user.username = token.username;
-            }
-            return session
+            let payload = {...session, token }
+            return payload
         },
-        async jwt({ token, user }) {
-            if(user){
-                token._id = user._id?.toString(),
-                token._isVerified = user.isVerified,
-                token.isAcceptingMessages = user.isAcceptingMessages;
-                token.username = user.username
-            }
+        async jwt({ token, user, profile }) {
+            token.picture = profile?.image
             return token
         }
     },
@@ -74,5 +71,5 @@ export const authOptions: NextAuthOptions = {
     session: {
         strategy: "jwt"
     },
-    secret: process.env.AUTH_SECRET
+    secret: process.env.NEXTAUTH_SECRET
 }

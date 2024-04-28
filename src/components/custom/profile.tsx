@@ -13,33 +13,21 @@ import Image from "next/image";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import Link from 'next/link';
+import { useSession } from "next-auth/react";
+import { signOut } from "next-auth/react"
 
 const Profile = () => {
-  const [userData, setUserData] = useState<any>({});
-  const router = useRouter();
-
-  useEffect(() => {
-    getUserDetails();
-  }, []);
-
-  const getUserDetails = async () => {
-    let res = await axios.post("/api/users/profile");
-    if (res.data.status == "success") {
-      setUserData(res.data.data);
-    } else if(res.data.status == "failed"){
-      setUserData({});
-    }
-  };
+  const router = useRouter()
+  const { data: session, status } = useSession()
 
   const handleLogout = async () => {
-    let res = await axios.post("/api/users/logout");
-    if (res.data.status === "success") {
-      setUserData({})
-    }
+    await signOut()
+    router.push("/home")
   };
+
   return (
     <div>
-      { userData.username ? (
+      { status == "authenticated" ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -48,7 +36,7 @@ const Profile = () => {
               className="overflow-hidden rounded-full"
             >
               <Image
-                src="/user.png"
+                src={session?.user?.image? session?.user?.image: "/user.png"}
                 width={36}
                 height={36}
                 alt="Avatar"
@@ -57,7 +45,7 @@ const Profile = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Hi, {userData?.username}</DropdownMenuLabel>
+            <DropdownMenuLabel>Hi, {session.user?.name}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuItem>Support</DropdownMenuItem>
@@ -67,7 +55,7 @@ const Profile = () => {
         </DropdownMenu>
       ) : (
         <Button asChild>
-          <Link href="/login">Login</Link>
+          <Link href="/sign-in">Login</Link>
         </Button>
       )}
     </div>

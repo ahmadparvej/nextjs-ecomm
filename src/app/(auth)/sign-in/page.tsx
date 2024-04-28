@@ -12,20 +12,19 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LoginSchema } from "@/schema/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from 'axios';
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
-import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { AiOutlineReload } from "react-icons/ai";
 import z from "zod";
 import toast from 'react-hot-toast';
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 
 const Login = () => {
-
+  
   const router = useRouter()
+  const { data: session, status } = useSession();
   const [btnLoading, setBtnLoading] = useState(false)
 
   const form = useForm<z.infer<typeof LoginSchema>>({
@@ -45,11 +44,6 @@ const Login = () => {
       password: values.password
     }
     )
-    
-
-    console.log(result)
-
-    // let res = await axios.post("api/users/login", values)
     if(result?.error){
       toast.error(result.error)
       setBtnLoading(false)
@@ -61,16 +55,12 @@ const Login = () => {
 
   const googleLogin = async () => {
     const result = await signIn('google')
-
     console.log(result)
+    router.push("/home")
+  }
 
-    // let res = await axios.post("api/users/login", values)
-    if(result?.error){
-      toast.error(result.error)
-      setBtnLoading(false)
-    }else if(result?.ok){
-      router.push("/home")
-    }
+  if(status === "authenticated"){
+    return router.push("/home")
   }
 
   return (

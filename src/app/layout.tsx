@@ -7,8 +7,8 @@ import AuthProvider from './context/AuthProvider';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "AC Expert",
-  description: "AC Technician",
+  title: "Auth",
+  description: "Auth",
 };
 
 export default function RootLayout({

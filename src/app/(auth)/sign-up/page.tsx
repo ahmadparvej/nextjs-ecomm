@@ -15,19 +15,19 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { RegisterSchema } from "@/schema/auth";
-import { useState, useTransition } from "react";
-import { RegisterAction } from "@/actions/auth";
+import { useState } from "react";
 import axios from 'axios';
 import { useRouter } from "next/navigation";
 import { AiOutlineReload } from "react-icons/ai";
 import toast from 'react-hot-toast';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from "next-auth/react";
 
 const Register = () => {
 
-  const [btnLoading, setBtnLoading] = useState(false)
   const router = useRouter()
-
+  const { data: session, status } = useSession();
+  const [btnLoading, setBtnLoading] = useState(false)
+  
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
@@ -54,17 +54,11 @@ const Register = () => {
   };
 
   const googleLogin = async () => {
-    const result = await signIn('google')
+    await signIn('google')
+  }
 
-    console.log(result)
-
-    // let res = await axios.post("api/users/login", values)
-    if(result?.error){
-      toast.error(result.error)
-      setBtnLoading(false)
-    }else if(result?.ok){
-      router.push("/home")
-    }
+  if(status === "authenticated"){
+    return router.push("/home")
   }
 
   return (

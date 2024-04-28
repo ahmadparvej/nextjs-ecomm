@@ -9,7 +9,7 @@ const Cart = () => {
     return (
         <div>
             <div>Cart</div>
-            <div>active user {user}</div>
+            <div>active user: {user? user: "No"}</div>
         </div>
     )
 }
