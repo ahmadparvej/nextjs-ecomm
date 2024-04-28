@@ -28,7 +28,10 @@ export default withAuth(
   function middleware(request) {
 
     const token = request.nextauth.token
-    console.log("at middleware =>",request.nextauth.token)
+
+    if( request.nextUrl.pathname && request.nextUrl.pathname === "/"){
+      return NextResponse.redirect(new URL( "/home" , request.url))
+    }
 
     if(!token && request.nextUrl.pathname.startsWith("/cart")){
       return NextResponse.redirect( new URL('/sign-in', request.url))
@@ -51,6 +54,7 @@ export default withAuth(
 
 export const config = {
     matcher: [
+      '/',
       '/cart'
     ],
   }
